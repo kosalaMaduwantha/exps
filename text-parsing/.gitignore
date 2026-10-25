@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+env/
+.venv/
+venv/
+
+# Generated outputs
+*.xlsx
+~$*.xlsx
+.~lock.*
+
+# OS / editor
+.DS_Store
