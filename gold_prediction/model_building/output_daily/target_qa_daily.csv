@@ -1,0 +1,12 @@
+,0
+raw_body_rows,2864
+rows_with_usable_date,2859
+rows_in_range_with_target,2834
+weekend_rows_removed,17
+duplicate_groups,160
+duplicate_rows_removed,160
+outliers_flagged,1
+final_observations,2656
+final_start,2015-02-05 00:00:00
+final_end,2026-10-26 00:00:00
+missing_business_days,402
