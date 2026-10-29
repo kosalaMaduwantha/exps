@@ -1,0 +1,6 @@
+metric,value
+holdout 95% volatility-band coverage (%),99.36575052854123
+mean volatility-band width (% of price),52.89541070350787
+holdout 95% quantile-model coverage (%),52.43128964059197
+mean quantile-model width (% of price),21.775174792920758
+holdout-origin 63-day volatility (% daily),0.914852762370285

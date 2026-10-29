@@ -1,0 +1,33 @@
+{
+  "selected_feature_set": "Core + future macro",
+  "n_features": 75,
+  "drift_cap_daily_log": 0.0008,
+  "holdout_metrics": {
+    "MAPE": 7.398349084382386,
+    "RMSE": 453.7864636866105,
+    "MAE": 314.73775780920585
+  },
+  "walk_forward_mean": {
+    "MAPE": 11.19788400153449,
+    "RMSE": 409.370169442651,
+    "MAE": 328.0559210664419
+  },
+  "recursive_holdout": {
+    "MAPE": 10.719608401157581,
+    "RMSE": 626.7458026532643,
+    "MAE": 457.0720546584655
+  },
+  "recursive_walk_forward_mean": {
+    "MAPE": 8.481738310180901,
+    "RMSE": 304.56651496584914,
+    "MAE": 251.05629921528555
+  },
+  "interval_method": "63-day realised volatility, lognormal 1.96 sigma",
+  "interval_coverage_pct": 99.36575052854123,
+  "quantile_interval_coverage_pct": 52.43128964059197,
+  "holdout_origin_vol_63d_daily": 0.00914852762370285,
+  "forecast_origin_vol_63d_daily": 0.012602049622184823,
+  "forecast_origin": "2026-10-26",
+  "forecast_origin_price": 4015.8,
+  "forecast_end": "2027-04-20"
+}
