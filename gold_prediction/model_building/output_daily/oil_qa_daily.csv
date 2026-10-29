@@ -1,0 +1,3 @@
+series,first_date,last_date,observations,missing_business_days,nonpositive_values,last_common_date,forward_filled_business_days,panel_missing_after_ffill
+Brent,2010-01-04,2026-10-28,4334,54,0,2026-10-16,6,0
+WTI,2010-01-04,2026-10-28,4229,159,1,2026-10-16,6,0

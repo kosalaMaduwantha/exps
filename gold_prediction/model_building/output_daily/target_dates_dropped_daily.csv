@@ -1,0 +1,9 @@
+raw_dates,kitco_usd,reason
+,1310.0,Dates missing or outside valid range
+1916-10-24 00:00:00,1265.7,Dates missing or outside valid range
+01/00/1900,28216.5,Dates missing or outside valid range
+1922-12-21 00:00:00,1818.4,Dates missing or outside valid range
+2132-08-22 00:00:00,1894.5,Dates missing or outside valid range
+2027-08-30 00:00:00,2520.9,Dates missing or outside valid range
+2028-09-02 00:00:00,2503.3,Dates missing or outside valid range
+2027-09-19 00:00:00,2563.86,Dates missing or outside valid range

@@ -41,7 +41,9 @@ The holdout window deliberately covers the historic 2024–2026 gold surge — a
 
 The daily notebook uses the Kitco USD price from `gold_data_new.xlsx` as the target and a business-day panel of external regressors.
 
-- **Cleaning:** robust date repair, duplicate-date resolution against the local median and WGC monthly average, weekend removal, and outlier flagging.
+- **Cleaning:** `Dates`-only parsing; invalid/out-of-range dates are dropped without manual repair. Duplicate dates are resolved against the local median, weekends are removed, and one outlier is flagged. The cleaned target has **2,652** observations and **406** missing business days.
+- **WGC:** no WGC cross-check in the daily pipeline. The WGC workbook is retained only for the legacy monthly model.
+- **Oil screening:** daily Brent/WTI levels and 20-day changes are tested against `|r| >= 0.5` (levels) and `|r| >= 0.3` (20-day changes). Neither passes, so oil is excluded from the final model.
 - **Validation:** 24-month holdout and four expanding 12-month walk-forward folds.
 - **Final regressors:** US 10-year yield, US Dollar Index, Fed funds rate, and CPI year-over-year, all lagged one business day.
 - **Model:** log target, multiplicative seasonality, yearly seasonality, no weekly seasonality, `changepoint_prior_scale=0.05`.
@@ -49,21 +51,22 @@ The daily notebook uses the Kitco USD price from `gold_data_new.xlsx` as the tar
 
 | Metric | Value |
 |---|---|
-| 24-month holdout MAPE | **6.28%** |
-| 24-month holdout RMSE | **$413.6** |
-| Walk-forward mean MAPE | **6.04%** |
-| Walk-forward mean RMSE | **$242.3** |
+| 24-month holdout MAPE | **6.35%** |
+| 24-month holdout RMSE | **$420.1** |
+| Walk-forward mean MAPE | **5.99%** |
+| Walk-forward mean RMSE | **$242.7** |
 | Forecast origin | **2026-10-26: $4,015.80** |
-| 6-month forecast (2027-04-20) | **$4,610.74** (95% band $3,915.20–$5,547.72) |
+| 6-month forecast (2027-04-20) | **$4,634.57** (95% band $3,866.92–$5,616.03) |
 
 Outputs are in `model_building/output_daily/` (cleaned target, feature panel, model comparison, holdout predictions, forecast, and PNG figures).
 
 ## Data (`data-sources/`)
 
 - `gold_data_new.xlsx` — daily Kitco USD target used by the new daily model (2015-02-05 → 2026-10-26 after cleaning)
-- `Gold_price_averages_in_a range_of_currencies_since_1978.xlsx` — monthly WGC averages, used as the monthly target and as daily QA (1978-01 → 2026-09, no gaps)
+- `Gold_price_averages_in_a range_of_currencies_since_1978.xlsx` — monthly WGC averages; legacy monthly target only, no longer used for daily QA (1978-01 → 2026-09, no gaps)
 - `data_gpr_daily_recent.xls` — daily geopolitical risk index (requires `xlrd`)
-- `DCOILWTICO.csv` / `DCOILBRENTEU.csv` — FRED daily crude prices (WTI kept as candidate only)
+- `brent_historical.csv` / `wti_historical.csv` — daily historical crude prices used by the daily model
+- `DCOILWTICO.csv` / `DCOILBRENTEU.csv` — legacy monthly-model inputs (FRED daily series resampled to monthly)
 - `FEDFUNDS.csv` — Fed funds effective rate (monthly)
 - `US Dollar Index Historical Data.csv` — Investing.com monthly (US-style MM/DD dates, newest first)
 - `Europe_Brent_Spot_Price_FOB.csv` — duplicate EIA Brent series (dropped)
