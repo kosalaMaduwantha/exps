@@ -1,0 +1,6 @@
+fold,seconds_including_selection,parameters,network_parameters
+cv_1,95.91087456399691,"{""group"": ""external"", ""lookback"": 60, ""units"": 32}",5955
+cv_2,91.78160872199805,"{""group"": ""gold_only"", ""lookback"": 20, ""units"": 32}",4611
+cv_3,59.754142684003455,"{""group"": ""gold_only"", ""lookback"": 20, ""units"": 32}",4611
+cv_4,51.40540984799736,"{""group"": ""gold_only"", ""lookback"": 20, ""units"": 32}",4611
+cv_5,53.85177368100267,"{""group"": ""external"", ""lookback"": 60, ""units"": 32}",5955
