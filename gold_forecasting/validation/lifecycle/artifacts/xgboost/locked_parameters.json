@@ -1,0 +1,5 @@
+{
+  "group": "external",
+  "max_depth": 2,
+  "n_estimators": 10
+}

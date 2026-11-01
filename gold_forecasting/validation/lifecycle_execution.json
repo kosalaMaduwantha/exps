@@ -1,0 +1,30 @@
+[
+  {
+    "model": "prophet",
+    "save_reload": "passed",
+    "development_only_holdout_path": "passed",
+    "final_refit_and_forecast": "passed",
+    "holdout_overwrite_guard": "passed"
+  },
+  {
+    "model": "xgboost",
+    "save_reload": "passed",
+    "development_only_holdout_path": "passed",
+    "final_refit_and_forecast": "passed",
+    "holdout_overwrite_guard": "passed"
+  },
+  {
+    "model": "gru",
+    "save_reload": "passed",
+    "development_only_holdout_path": "passed",
+    "final_refit_and_forecast": "passed",
+    "holdout_overwrite_guard": "passed"
+  },
+  {
+    "model": "lstm",
+    "save_reload": "passed",
+    "development_only_holdout_path": "passed",
+    "final_refit_and_forecast": "passed",
+    "holdout_overwrite_guard": "passed"
+  }
+]

@@ -1,0 +1,14 @@
+test_date_parser_does_not_guess_malformed_year (test_pipeline.TimeSafetyTests.test_date_parser_does_not_guess_malformed_year) ... ok
+test_feature_history_unchanged_by_future (test_pipeline.TimeSafetyTests.test_feature_history_unchanged_by_future) ... ok
+test_holdout_not_in_development (test_pipeline.TimeSafetyTests.test_holdout_not_in_development) ... ok
+test_negative_wti_is_preserved_without_log_features (test_pipeline.TimeSafetyTests.test_negative_wti_is_preserved_without_log_features) ... ok
+test_release_is_not_visible_early (test_pipeline.TimeSafetyTests.test_release_is_not_visible_early) ... ok
+test_sequence_labels_are_observed (test_pipeline.TimeSafetyTests.test_sequence_labels_are_observed) ... ok
+test_stale_release_expires (test_pipeline.TimeSafetyTests.test_stale_release_expires) ... ok
+test_target_gaps_remain_missing (test_pipeline.TimeSafetyTests.test_target_gaps_remain_missing) ... ok
+test_targets_never_cross_cutoff (test_pipeline.TimeSafetyTests.test_targets_never_cross_cutoff) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.123s
+
+OK

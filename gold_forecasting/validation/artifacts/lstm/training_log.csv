@@ -1,0 +1,2 @@
+fold,seconds_including_selection,parameters,network_parameters
+cv_1,7.105755730999817,"{""group"": ""external"", ""lookback"": 20, ""units"": 32}",7619

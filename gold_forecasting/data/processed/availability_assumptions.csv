@@ -1,0 +1,15 @@
+series,frequency,lag,staleness_limit_calendar_days,availability_status
+brent,daily,1,10,assumed; historical vintages unavailable
+wti,daily,1,10,assumed; historical vintages unavailable
+brent_spot,daily,1,10,assumed; historical vintages unavailable
+yield10,daily,1,10,assumed; historical vintages unavailable
+dxy,monthly,1,65,assumed; historical vintages unavailable
+fed,monthly,7,75,assumed; historical vintages unavailable
+cpi_yoy,monthly,15,80,assumed; historical vintages unavailable
+cpi_mom,monthly,15,80,assumed; historical vintages unavailable
+gpr,calendar_daily,7,20,assumed; historical vintages unavailable
+gpr_ma7,calendar_daily,7,20,assumed; historical vintages unavailable
+gpr_acts,calendar_daily,7,20,assumed; historical vintages unavailable
+gpr_acts_ma7,calendar_daily,7,20,assumed; historical vintages unavailable
+gpr_threats,calendar_daily,7,20,assumed; historical vintages unavailable
+gpr_threats_ma7,calendar_daily,7,20,assumed; historical vintages unavailable

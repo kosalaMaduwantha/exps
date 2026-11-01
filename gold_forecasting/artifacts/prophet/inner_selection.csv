@@ -1,0 +1,16 @@
+candidate,inner_MAE,params,fold
+0,96.5835504501513,"{""group"": ""gold_only"", ""changepoint_prior_scale"": 0.05}",cv_1
+1,54.27914200336752,"{""group"": ""external"", ""changepoint_prior_scale"": 0.05}",cv_1
+2,65.01218173003882,"{""group"": ""external"", ""changepoint_prior_scale"": 0.2}",cv_1
+0,150.0218335532076,"{""group"": ""gold_only"", ""changepoint_prior_scale"": 0.05}",cv_2
+1,36.23252468119551,"{""group"": ""external"", ""changepoint_prior_scale"": 0.05}",cv_2
+2,39.43896753515573,"{""group"": ""external"", ""changepoint_prior_scale"": 0.2}",cv_2
+0,95.35441236729832,"{""group"": ""gold_only"", ""changepoint_prior_scale"": 0.05}",cv_3
+1,106.2567395920409,"{""group"": ""external"", ""changepoint_prior_scale"": 0.05}",cv_3
+2,112.28313396249148,"{""group"": ""external"", ""changepoint_prior_scale"": 0.2}",cv_3
+0,233.81190431464185,"{""group"": ""gold_only"", ""changepoint_prior_scale"": 0.05}",cv_4
+1,124.69607848109054,"{""group"": ""external"", ""changepoint_prior_scale"": 0.05}",cv_4
+2,124.56713139568872,"{""group"": ""external"", ""changepoint_prior_scale"": 0.2}",cv_4
+0,222.33429311057583,"{""group"": ""gold_only"", ""changepoint_prior_scale"": 0.05}",cv_5
+1,128.45518403245566,"{""group"": ""external"", ""changepoint_prior_scale"": 0.05}",cv_5
+2,127.96404244671798,"{""group"": ""external"", ""changepoint_prior_scale"": 0.2}",cv_5
