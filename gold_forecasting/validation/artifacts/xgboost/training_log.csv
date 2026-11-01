@@ -1,0 +1,2 @@
+fold,seconds_including_selection,parameters,network_parameters
+cv_1,0.11988036299999294,"{""group"": ""external"", ""max_depth"": 2, ""n_estimators"": 10}",

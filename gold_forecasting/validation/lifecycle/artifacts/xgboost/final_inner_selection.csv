@@ -1,0 +1,2 @@
+candidate,inner_MAE,params
+0,42.176019668645324,"{""group"": ""external"", ""max_depth"": 2, ""n_estimators"": 10}"

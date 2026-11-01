@@ -1,0 +1,4 @@
+{
+  "group": "external",
+  "changepoint_prior_scale": 0.05
+}

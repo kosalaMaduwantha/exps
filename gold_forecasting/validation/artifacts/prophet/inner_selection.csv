@@ -1,0 +1,2 @@
+candidate,inner_MAE,params,fold
+0,52.85965916071388,"{""group"": ""external"", ""changepoint_prior_scale"": 0.05}",cv_1

@@ -1,0 +1,2 @@
+fold,seconds_including_selection,parameters,network_parameters
+cv_1,2.6801542350001455,"{""group"": ""external"", ""changepoint_prior_scale"": 0.05}",

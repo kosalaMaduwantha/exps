@@ -1,0 +1,6 @@
+fold,seconds_including_selection,parameters,network_parameters
+cv_1,8.347865775998798,"{""group"": ""external"", ""changepoint_prior_scale"": 0.05}",
+cv_2,7.3072664810024435,"{""group"": ""external"", ""changepoint_prior_scale"": 0.05}",
+cv_3,6.440786832012236,"{""group"": ""gold_only"", ""changepoint_prior_scale"": 0.05}",
+cv_4,7.660831818997394,"{""group"": ""external"", ""changepoint_prior_scale"": 0.2}",
+cv_5,8.44983162599965,"{""group"": ""external"", ""changepoint_prior_scale"": 0.2}",

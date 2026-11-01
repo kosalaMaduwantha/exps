@@ -1,0 +1,38 @@
+[
+  {
+    "notebook": "01_gold_common_preprocessing.ipynb",
+    "code_cells": 7,
+    "seconds": 2.302100125999914,
+    "status": "passed"
+  },
+  {
+    "notebook": "02_gold_prophet.ipynb",
+    "code_cells": 8,
+    "seconds": 3.6800565439998536,
+    "status": "passed"
+  },
+  {
+    "notebook": "03_gold_xgboost.ipynb",
+    "code_cells": 8,
+    "seconds": 0.3426299990001098,
+    "status": "passed"
+  },
+  {
+    "notebook": "04_gold_gru.ipynb",
+    "code_cells": 8,
+    "seconds": 9.548553875000152,
+    "status": "passed"
+  },
+  {
+    "notebook": "05_gold_lstm.ipynb",
+    "code_cells": 8,
+    "seconds": 7.379940063000049,
+    "status": "passed"
+  },
+  {
+    "notebook": "06_gold_model_comparison.ipynb",
+    "code_cells": 6,
+    "seconds": 0.38459513199995854,
+    "status": "passed"
+  }
+]

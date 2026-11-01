@@ -1,0 +1,3 @@
+model,total_predictions,observed_targets,common_predictions
+prophet,78,65,65
+xgboost,78,65,65

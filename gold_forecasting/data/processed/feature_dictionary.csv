@@ -1,0 +1,76 @@
+feature,meaning
+gold_latest,"Gold history through origin t; filled inputs limited by configuration, labels never filled."
+gold_missing,Indicator: source value unavailable at this origin.
+gold_lag_1,"Gold history through origin t; filled inputs limited by configuration, labels never filled."
+gold_lag_2,"Gold history through origin t; filled inputs limited by configuration, labels never filled."
+gold_lag_5,"Gold history through origin t; filled inputs limited by configuration, labels never filled."
+gold_lag_10,"Gold history through origin t; filled inputs limited by configuration, labels never filled."
+gold_lag_20,"Gold history through origin t; filled inputs limited by configuration, labels never filled."
+gold_lag_60,"Gold history through origin t; filled inputs limited by configuration, labels never filled."
+gold_ret_5,Trailing log difference over the indicated weekday-grid steps.
+gold_vol_5,"Gold history through origin t; filled inputs limited by configuration, labels never filled."
+gold_mean_ratio_5,"Gold history through origin t; filled inputs limited by configuration, labels never filled."
+gold_ret_20,Trailing log difference over the indicated weekday-grid steps.
+gold_vol_20,"Gold history through origin t; filled inputs limited by configuration, labels never filled."
+gold_mean_ratio_20,"Gold history through origin t; filled inputs limited by configuration, labels never filled."
+gold_ret_60,Trailing log difference over the indicated weekday-grid steps.
+gold_vol_60,"Gold history through origin t; filled inputs limited by configuration, labels never filled."
+gold_mean_ratio_60,"Gold history through origin t; filled inputs limited by configuration, labels never filled."
+brent,Origin-time value or deterministic calendar feature; see README and availability table.
+brent_missing,Indicator: source value unavailable at this origin.
+brent_age_days,Calendar days since the latest source observation; unavailable until assumed release.
+brent_spot,Origin-time value or deterministic calendar feature; see README and availability table.
+brent_spot_missing,Indicator: source value unavailable at this origin.
+brent_spot_age_days,Calendar days since the latest source observation; unavailable until assumed release.
+wti,Origin-time value or deterministic calendar feature; see README and availability table.
+wti_missing,Indicator: source value unavailable at this origin.
+wti_age_days,Calendar days since the latest source observation; unavailable until assumed release.
+yield10,Origin-time value or deterministic calendar feature; see README and availability table.
+yield10_missing,Indicator: source value unavailable at this origin.
+yield10_age_days,Calendar days since the latest source observation; unavailable until assumed release.
+dxy,Origin-time value or deterministic calendar feature; see README and availability table.
+dxy_missing,Indicator: source value unavailable at this origin.
+dxy_age_days,Calendar days since the latest source observation; unavailable until assumed release.
+fed,Origin-time value or deterministic calendar feature; see README and availability table.
+fed_missing,Indicator: source value unavailable at this origin.
+fed_age_days,Calendar days since the latest source observation; unavailable until assumed release.
+cpi_yoy,Origin-time value or deterministic calendar feature; see README and availability table.
+cpi_yoy_missing,Indicator: source value unavailable at this origin.
+cpi_yoy_age_days,Calendar days since the latest source observation; unavailable until assumed release.
+cpi_mom,Origin-time value or deterministic calendar feature; see README and availability table.
+cpi_mom_missing,Indicator: source value unavailable at this origin.
+cpi_mom_age_days,Calendar days since the latest source observation; unavailable until assumed release.
+gpr,Origin-time value or deterministic calendar feature; see README and availability table.
+gpr_missing,Indicator: source value unavailable at this origin.
+gpr_age_days,Calendar days since the latest source observation; unavailable until assumed release.
+gpr_acts,Origin-time value or deterministic calendar feature; see README and availability table.
+gpr_acts_missing,Indicator: source value unavailable at this origin.
+gpr_acts_age_days,Calendar days since the latest source observation; unavailable until assumed release.
+gpr_threats,Origin-time value or deterministic calendar feature; see README and availability table.
+gpr_threats_missing,Indicator: source value unavailable at this origin.
+gpr_threats_age_days,Calendar days since the latest source observation; unavailable until assumed release.
+gpr_ma7,Origin-time value or deterministic calendar feature; see README and availability table.
+gpr_ma7_missing,Indicator: source value unavailable at this origin.
+gpr_ma7_age_days,Calendar days since the latest source observation; unavailable until assumed release.
+gpr_acts_ma7,Origin-time value or deterministic calendar feature; see README and availability table.
+gpr_acts_ma7_missing,Indicator: source value unavailable at this origin.
+gpr_acts_ma7_age_days,Calendar days since the latest source observation; unavailable until assumed release.
+gpr_threats_ma7,Origin-time value or deterministic calendar feature; see README and availability table.
+gpr_threats_ma7_missing,Indicator: source value unavailable at this origin.
+gpr_threats_ma7_age_days,Calendar days since the latest source observation; unavailable until assumed release.
+brent_ret_5,Trailing log difference over the indicated weekday-grid steps.
+brent_ret_20,Trailing log difference over the indicated weekday-grid steps.
+brent_spot_ret_5,Trailing log difference over the indicated weekday-grid steps.
+brent_spot_ret_20,Trailing log difference over the indicated weekday-grid steps.
+dxy_ret_5,Trailing log difference over the indicated weekday-grid steps.
+dxy_ret_20,Trailing log difference over the indicated weekday-grid steps.
+wti_chg_5,Trailing absolute difference over the indicated weekday-grid steps.
+wti_chg_20,Trailing absolute difference over the indicated weekday-grid steps.
+yield10_chg_5,Trailing absolute difference over the indicated weekday-grid steps.
+yield10_chg_20,Trailing absolute difference over the indicated weekday-grid steps.
+fed_chg_5,Trailing absolute difference over the indicated weekday-grid steps.
+fed_chg_20,Trailing absolute difference over the indicated weekday-grid steps.
+yield_spread,Origin-time value or deterministic calendar feature; see README and availability table.
+weekday,Origin-time value or deterministic calendar feature; see README and availability table.
+year_sin,Origin-time value or deterministic calendar feature; see README and availability table.
+year_cos,Origin-time value or deterministic calendar feature; see README and availability table.

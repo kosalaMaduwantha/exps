@@ -1,0 +1,2 @@
+candidate,inner_MAE,params
+0,45.68793129344778,"{""group"": ""external"", ""lookback"": 20, ""units"": 32}"

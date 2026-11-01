@@ -1,0 +1,5 @@
+model,total_predictions,observed_targets,common_predictions
+gru,15,14,14
+lstm,15,14,14
+prophet,15,14,14
+xgboost,15,14,14

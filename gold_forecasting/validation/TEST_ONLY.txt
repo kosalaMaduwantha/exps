@@ -1,0 +1,4 @@
+All files under this directory are short workflow validation results.
+The lifecycle artifacts use an early development subset and a simulated holdout.
+They are not final models and do not use the reserved final-year holdout.
+Run the six main notebooks for the full experiment.
