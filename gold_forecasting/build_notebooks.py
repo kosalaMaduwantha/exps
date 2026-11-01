@@ -251,7 +251,16 @@ axes[1].set_ylabel('Forecast error')
 axes[1].legend(title='Horizon')
 plt.suptitle('')
 plt.tight_layout()'''),
-        markdown('''## 6. Lock the final configuration and evaluate the untouched holdout
+        markdown('''## 6. Plot development forecasts against observed prices
+These figures use the fixed-origin predictions from each outer fold:
+1. full observed history with every outer prediction;
+2. actual vs forecast for each horizon;
+3. training context plus test block per fold;
+4. actual vs predicted price per horizon.
+Each plot is also saved to `artifacts/<model>/plots/`.'''),
+        code('''from gold_plot_utils import plot_model_cv
+plot_model_cv(panel, cv_predictions, folds, KIND, cfg, ROOT / 'artifacts' / KIND)'''),
+        markdown('''## 7. Lock the final configuration and evaluate the untouched holdout
 The default is off so you can review development results first. Set
 `final_holdout_enabled` to true in `config.json` when ready. This is an experiment guard,
 not a request for additional permission. The function chooses parameters using development
@@ -264,7 +273,7 @@ if cfg['final_holdout_enabled']:
     display(locked_parameters)
 else:
     print('Holdout not evaluated. Development predictions remain available for review.')'''),
-        markdown('''## 7. Refit the locked model and generate future forecasts
+        markdown('''## 8. Refit the locked model and generate future forecasts
 Run after the final holdout stage. The forecast starts from the latest observed gold quote.
 Only the configured horizons are returned. Future actual external factors are not supplied.
 Artifacts include the fitted model, input feature names, preprocessing where applicable,
@@ -275,6 +284,24 @@ if cfg['final_holdout_enabled'] and locked.exists():
     display(future_forecast)
 else:
     print('Final refit waits for the parameter-lock stage.')'''),
+        markdown('''## 9. Optional holdout and future forecast plots
+These figures appear only when the matching artifacts exist:
+- `artifacts/<model>/holdout_predictions.csv` after a locked holdout run;
+- `artifacts/<model>/future_forecast.csv` after the final refit.'''),
+        code('''from gold_plot_utils import plot_model_holdout, plot_future_forecast
+out_dir = ROOT / 'artifacts' / KIND
+holdout_path = out_dir / 'holdout_predictions.csv'
+future_path = out_dir / 'future_forecast.csv'
+if holdout_path.exists():
+    holdout_predictions = pd.read_csv(holdout_path, parse_dates=['origin', 'target_date'])
+    plot_model_holdout(panel, holdout_predictions, folds, KIND, cfg, out_dir)
+else:
+    print('No holdout predictions yet.')
+if future_path.exists():
+    future_forecast = pd.read_csv(future_path, parse_dates=['origin', 'target_date'])
+    plot_future_forecast(panel, future_forecast, KIND, cfg, out_dir)
+else:
+    print('No future forecast yet.')'''),
     ]
     save(f'{number:02d}_gold_{kind}.ipynb', cells)
 
@@ -293,7 +320,7 @@ predictions, results, coverage = compare_results('cv')
 display(coverage)
 print('Models currently available:', predictions.model.unique().tolist())
 display(results)'''),
-markdown('## 2. Compare pooled errors and fold stability'),
+markdown('## 3. Compare pooled errors and fold stability'),
 code('''# Pooled MAE weights individual forecast errors equally within each horizon.
 observed = predictions.dropna(subset=['actual', 'prediction']).copy()
 observed['absolute_error'] = (observed.prediction - observed.actual).abs()
@@ -302,14 +329,14 @@ display(pooled)
 pooled.plot.bar(figsize=(12, 4), ylabel='MAE', title='Errors on common observed targets')
 plt.tight_layout()
 display(results.groupby(['model', 'horizon']).MAE.agg(['mean', 'std', 'min', 'max']))'''),
-markdown('## 3. Inspect residuals through time'),
+markdown('## 4. Inspect residuals through time'),
 code('''horizon = cfg['horizons'][-1]
 fig, ax = plt.subplots(figsize=(13, 4))
 for model, group in observed.loc[observed.horizon.eq(horizon)].groupby('model'):
     group.sort_values('target_date').plot(x='target_date', y='absolute_error', ax=ax, label=model)
 ax.set_title(f'Absolute error: {horizon}-step forecasts')
 plt.tight_layout()'''),
-markdown('''## 4. Inspect external-feature selection
+markdown('''## 5. Inspect external-feature selection
 Inner scores show which feature group was selected without using the corresponding outer block.
 Interpret importance as predictive association, not a causal explanation.'''),
 code('''tables = []
@@ -321,7 +348,7 @@ if tables:
     selection = pd.concat(tables, ignore_index=True)
     selection['group'] = selection.params.map(lambda value: json.loads(value)['group'])
     display(selection.groupby(['model', 'group']).inner_MAE.agg(['mean', 'std', 'count']))'''),
-markdown('''## 5. Review final holdout results if available
+markdown('''## 6. Review final holdout results if available
 Keep these separate from development results. Do not retune using this table.
 The current package does not claim uncertainty intervals or verified real-time release vintages.'''),
 code('''holdout_files = list((ROOT / 'artifacts').glob('*/holdout_predictions.csv'))
@@ -331,5 +358,27 @@ if holdout_files:
     display(holdout_results)
 else:
     print('No holdout results yet.')'''),
+markdown('''## 7. Optional holdout comparison plots
+
+These figures appear only when all models have observed holdout predictions:
+- `holdout_comparison_actual_and_forecasts.png`
+- `holdout_comparison_by_fold.png`
+- `holdout_comparison_actual_vs_predicted_scatter.png`
+- `holdout_comparison_error_ranking.png`
+
+They use the same helper functions as the development comparison plots, with
+`stage='holdout'` so only the untouched holdout block is plotted.'''),
+code('''holdout_files = sorted((ROOT / 'artifacts').glob('*/holdout_predictions.csv'))
+if len(holdout_files) >= 2:
+    holdout_predictions = pd.concat(
+        [pd.read_csv(path, parse_dates=['origin', 'target_date'])
+         for path in holdout_files], ignore_index=True)
+    out_dir = ROOT / 'artifacts' / 'comparison'
+    plot_comparison_actual_and_forecasts(holdout_predictions, panel, folds, cfg, out_dir, stage='holdout')
+    plot_comparison_by_fold(holdout_predictions, panel, folds, cfg, out_dir, stage='holdout')
+    plot_comparison_scatter(holdout_predictions, panel, folds, cfg, out_dir, stage='holdout')
+    plot_comparison_error_ranking(holdout_predictions, cfg, out_dir, stage='holdout')
+else:
+    print('Need at least two models with holdout predictions to compare them.')'''),
 ])
 print('Created six notebooks.')

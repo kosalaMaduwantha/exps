@@ -19,5 +19,5 @@
   "gold_feature_ffill_limit": 5,
   "max_epochs": 60,
   "patience": 8,
-  "final_holdout_enabled": false
+  "final_holdout_enabled": true
 }

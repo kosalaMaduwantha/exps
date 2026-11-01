@@ -162,7 +162,7 @@ def sequence_rows(panel, cutoff, lookback, horizons):
     so a network never trains on an imputed gold history.
     """
     origins = np.arange(max(60, lookback - 1), cutoff - max(horizons) + 1)
-    valid = panel.y.iloc[origins].notna().to_numpy()
+    valid = panel.y.iloc[origins].notna().to_numpy(copy=True)
     for horizon in horizons:
         valid &= panel.y.iloc[origins + horizon].notna().to_numpy()
 

@@ -1,0 +1,4 @@
+candidate,inner_MAE,params
+0,381.7959995747269,"{""group"": ""gold_only"", ""changepoint_prior_scale"": 0.05}"
+1,138.76249035594563,"{""group"": ""external"", ""changepoint_prior_scale"": 0.05}"
+2,140.76174505653617,"{""group"": ""external"", ""changepoint_prior_scale"": 0.2}"

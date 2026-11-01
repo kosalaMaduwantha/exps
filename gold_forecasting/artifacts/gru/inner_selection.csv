@@ -1,0 +1,16 @@
+candidate,inner_MAE,params,fold
+0,42.69145299865139,"{""group"": ""gold_only"", ""lookback"": 20, ""units"": 32}",cv_1
+1,42.26785455269947,"{""group"": ""external"", ""lookback"": 20, ""units"": 32}",cv_1
+2,41.81677669246991,"{""group"": ""external"", ""lookback"": 60, ""units"": 32}",cv_1
+0,19.2849770664175,"{""group"": ""gold_only"", ""lookback"": 20, ""units"": 32}",cv_2
+1,20.2899897831678,"{""group"": ""external"", ""lookback"": 20, ""units"": 32}",cv_2
+2,27.912796873648958,"{""group"": ""external"", ""lookback"": 60, ""units"": 32}",cv_2
+0,47.86140926670034,"{""group"": ""gold_only"", ""lookback"": 20, ""units"": 32}",cv_3
+1,48.31180822931392,"{""group"": ""external"", ""lookback"": 20, ""units"": 32}",cv_3
+2,51.987543924662795,"{""group"": ""external"", ""lookback"": 60, ""units"": 32}",cv_3
+0,31.393968217323238,"{""group"": ""gold_only"", ""lookback"": 20, ""units"": 32}",cv_4
+1,35.50747739543522,"{""group"": ""external"", ""lookback"": 20, ""units"": 32}",cv_4
+2,33.22250328203044,"{""group"": ""external"", ""lookback"": 60, ""units"": 32}",cv_4
+0,79.93797487790391,"{""group"": ""gold_only"", ""lookback"": 20, ""units"": 32}",cv_5
+1,75.53812381510932,"{""group"": ""external"", ""lookback"": 20, ""units"": 32}",cv_5
+2,74.28052607451878,"{""group"": ""external"", ""lookback"": 60, ""units"": 32}",cv_5

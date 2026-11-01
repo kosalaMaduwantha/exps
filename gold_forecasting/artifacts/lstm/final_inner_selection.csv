@@ -1,0 +1,4 @@
+candidate,inner_MAE,params
+0,97.14699501182638,"{""group"": ""gold_only"", ""lookback"": 20, ""units"": 32}"
+1,83.8026339816253,"{""group"": ""external"", ""lookback"": 20, ""units"": 32}"
+2,81.09756003140079,"{""group"": ""external"", ""lookback"": 60, ""units"": 32}"

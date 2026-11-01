@@ -1,3 +1,5 @@
 model,total_predictions,observed_targets,common_predictions
+gru,78,65,65
+lstm,78,65,65
 prophet,78,65,65
 xgboost,78,65,65
