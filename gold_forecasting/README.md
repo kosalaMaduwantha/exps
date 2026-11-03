@@ -62,7 +62,8 @@ using later prices. Exact target duplicates retain the first row.
 The calendar is Monday–Friday, not a verified gold-exchange holiday calendar.
 Weekend-dated gold rows are quarantined. Weekday gaps are reported as unobserved;
 this project does not invent a holiday classification without a supplied calendar.
-Forecast horizons [1, 5, 20] mean weekday-grid steps. For example, a holiday weekday
+Forecast horizons [5, 21, 63, 126, 252] mean weekday-grid steps and are labeled
+7 days, 1 month, 3 months, 6 months and 1 year. For example, a holiday weekday
 still counts as one step. Missing target dates are never scored or filled as labels.
 
 Gold input values can be forward-filled for at most five weekday steps; a missing
@@ -113,9 +114,11 @@ No additional data is downloaded automatically by the notebooks.
 ## Model design
 
 Prophet fits log prices with yearly and weekly seasonality. Its external variant
-uses a small regularized regressor set. Each fixed-origin future holds the
-regressors at their last available origin values; these are conditional scenarios.
-Missing historical regressors use training medians. Constant regressors are omitted
+uses a small regularized regressor set. Fixed-origin development forecasts hold
+each regressor at its last available origin value. The final future forecast keeps
+the fitted coefficients frozen and instead feeds anchored auxiliary Prophet paths
+fitted to each regressor’s daily as-of history through the origin. Missing
+historical regressors use training medians. Constant regressors are omitted
 within a fold. Target-derived regressors are excluded.
 
 XGBoost fits one direct model per horizon to log(y[t+h]/y[t]), using lagged prices,
@@ -132,58 +135,47 @@ prior training history as context, but all window inputs end at the forecast ori
 
 ## Evaluation contract
 
-The final 252 weekday slots are held out. Five earlier expanding-window folds have
-126-slot validation blocks. Each outer fold uses a preceding 126-slot inner block
-to choose among three initial configurations. Feature-group selection is inside
-this inner loop. Training targets must occur no later than the training cutoff.
+This deliverable is a forecast-only run. No cross-validation, holdout scoring or
+model ranking was executed. The configuration still defines a valid future
+evaluation schedule: three development folds with 360-slot validation blocks and
+a 504-slot final holdout, enough room for the 252-step horizon. Existing locked
+hyperparameters from the prior `[1, 5, 20]` run were reused without reselection.
 
-Models refit at outer-fold boundaries. Within a block, each forecast origin can
-use newly observed historical inputs through that origin; each horizon forecast
-then remains fixed. It cannot ingest later observations during that forecast.
-Origins are spaced every 20 weekday slots by default. This limits overlap but
-produces fewer evaluation cases; set origin_stride=1 for denser evaluation.
+Models refit once on all available observed history. Each future forecast starts
+from the latest observed gold quote and uses only origin-time features, except
+Prophet’s anchored auxiliary external paths described above. No calibrated
+prediction intervals or significance claims are provided.
 
-Selection uses equally weighted horizon MAE on original price units. Metrics also
-include RMSE, MAPE, MASE and skill relative to persistence. MASE uses the mean
-absolute consecutive-observation one-step change in training; pairs with missing
-labels are omitted. Comparison also includes trailing 252-slot drift and reports
-coverage on common observed targets. Plot fold variability rather than interpreting
-a small overall score difference as a reliable model advantage.
+## Final refit and prediction
 
-Development metric summaries average folds; the comparison notebook also computes
-pooled MAE to make weighting explicit. The comparison works with whichever model
-results exist and lists those models. It does not imply unrun models were evaluated.
-A compact initial search is implemented, not an exhaustive hyperparameter study.
-No calibrated prediction intervals or significance claims are provided.
-
-## Final holdout, refit, and prediction
-
-After reviewing development results, set final_holdout_enabled=true in config.json.
-Rerun the final two cells of each model notebook, or:
+The current run uses the already locked hyperparameters and skips the holdout
+stage. Run the final refit cell in each model notebook, or:
 
 ```bash
-python run_pipeline.py --stage holdout --model all
 python run_pipeline.py --stage forecast --model all
 ```
 
-The holdout stage selects parameters using only pre-holdout data, writes a locked
-configuration, trains the holdout model, and scores the final period once.
-Existing holdout result files are protected against accidental reruns. Read existing
-results rather than deleting and recreating them to tune on the holdout.
-
 Final refitting uses the locked configuration and all available observed history.
-Saved forecasts contain the origin date, horizon, target date and price forecast.
-The final model directory includes input columns, training configuration and cutoff,
-and all fitted transformations needed to reproduce inference. `load_bundle` restores
-these artifacts. Loading joblib artifacts should be limited to files you trust.
+Saved forecasts contain the origin date, horizon, horizon label, target date,
+origin price, forecast and percent change from the origin. Prophet also writes
+`future_regressors.csv` with the anchored auxiliary external paths used for the
+forecast. The final model directory includes input columns, training
+configuration and cutoff, and all fitted transformations needed to reproduce
+inference. `load_bundle` restores these artifacts. Loading joblib artifacts
+should be limited to files you trust.
+
+Earlier `[1, 5, 20]` CV, holdout and forecast artifacts were moved to
+`artifacts/_archive_1_5_20/` and are not part of the current live outputs.
 
 ## Outputs and validation
 
 - data/raw/: original supplied source files.
 - data/processed/: shared panel, feature candidates, audit, dictionary, assumptions,
   fold schedule, exact preprocessing configuration and source manifest.
-- artifacts/MODEL/: CV predictions, metrics, inner scores, training times,
-  locked parameters, holdout results and final model/forecast when run.
+- artifacts/MODEL/: locked parameters, the refitted final model, future forecast,
+  Prophet’s future external paths, and future forecast plots.
+- artifacts/comparison/future_forecasts.csv: one combined table for all models.
+- artifacts/_archive_1_5_20/: archived results from the previous `[1, 5, 20]` run.
 - validation/: short workflow test results, explicitly separate from full experiments.
 - VALIDATION.md: what was actually executed for this deliverable.
 

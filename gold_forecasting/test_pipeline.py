@@ -19,7 +19,7 @@ from gold_common_utils import (
     make_features,
     parse_gold_date,
 )
-from gold_model_utils import sequence_rows, supervised_rows
+from gold_model_utils import forecast_external_paths, sequence_rows, supervised_rows
 
 
 class TimeSafetyTests(unittest.TestCase):
@@ -114,6 +114,39 @@ class TimeSafetyTests(unittest.TestCase):
         self.assertEqual(parse_gold_date('31.10..2017'), pd.Timestamp('2017-10-31'))
         self.assertTrue(pd.isna(parse_gold_date('22.08.20232')))
         self.assertTrue(pd.isna(parse_gold_date('01/00/1900')))
+
+
+class FutureMacroPathTests(unittest.TestCase):
+    """Guards around auxiliary future external-regressor paths."""
+
+    def test_future_paths_are_anchored_and_ignore_future_rows(self):
+        """Paths start at the origin value and never read rows after it."""
+        index = pd.bdate_range('2024-01-01', periods=80)
+        panel = pd.DataFrame(index=index)
+        x = pd.DataFrame(index=index)
+        x['macro'] = np.linspace(1.0, 2.0, len(index))
+        x['flat'] = 5.0
+        cfg = {'horizons': [1, 2, 3], 'horizon_labels': ['a', 'b', 'c']}
+        origin = 60
+
+        before = forecast_external_paths(panel, x, origin, ['macro', 'flat'], cfg)
+        changed = x.copy()
+        changed.iloc[origin + 1 :] = 999.0
+        after = forecast_external_paths(
+            panel, changed, origin, ['macro', 'flat'], cfg
+        )
+
+        expected_dates = pd.bdate_range(
+            panel.index[origin] + pd.offsets.BDay(1), periods=3
+        )
+        self.assertEqual(len(before), 3)
+        self.assertTrue(before.ds.isin(expected_dates).all())
+        self.assertTrue(before['macro'].notna().all())
+        self.assertTrue(before['flat'].eq(5.0).all())
+        self.assertLessEqual(
+            abs(before['macro'].iloc[0] - x['macro'].iloc[origin]), 0.1
+        )
+        pd.testing.assert_frame_equal(before, after)
 
 
 if __name__ == '__main__':

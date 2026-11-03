@@ -25,7 +25,13 @@ MODEL_COLORS = {
     'persistence': '#7f7f7f',
     'trailing_drift': '#a0522d',
 }
-HORIZON_COLORS = {1: '#1f77b4', 5: '#ff7f0e', 20: '#2ca02c'}
+HORIZON_COLORS = {
+    5: '#1f77b4',
+    21: '#ff7f0e',
+    63: '#2ca02c',
+    126: '#d62728',
+    252: '#9467bd',
+}
 TEST_ALPHA = 0.10
 
 

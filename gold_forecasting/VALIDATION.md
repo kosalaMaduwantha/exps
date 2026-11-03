@@ -8,45 +8,49 @@
 - Gold row audit: 2,646 retained, 147 exact-target duplicate rows excluded,
   28 rows belonging to conflicting duplicate groups quarantined, 17 weekend rows
   quarantined, 16 missing/out-of-bounds target rows excluded, 10 unresolved dates.
-- All six notebook workflows executed cell by cell with no remaining code errors.
-- Model workflow tests used one outer development fold and one external-feature
-  candidate, two maximum neural epochs and ten XGBoost trees. Prophet used its
-  normal fitting procedure. These are installation/workflow tests, not final experiments.
-- All four model adapters produced finite predictions for horizons 1, 5 and 20.
-- All four saved model types were reloaded and reproduced predictions within 1e-5
-  relative tolerance.
-- The parameter-lock, holdout scoring, final refit and future forecast paths were
-  tested for all four models on an early DEVELOPMENT subset, using a simulated
-  holdout boundary. The actual final 252-slot holdout was not evaluated.
-- Repeated holdout writes were rejected as intended.
-- Nine focused automated tests passed: release timing, stale-data expiry, feature
+- Forecast-only refits executed for Prophet, XGBoost, GRU and LSTM using the
+  existing locked hyperparameters and all available observed history.
+- All four models produced finite forecasts for horizons 5, 21, 63, 126 and 252.
+- Prophet future external-regressor paths were generated, anchored to the origin
+  values and saved to `artifacts/prophet/future_regressors.csv`.
+- Each model’s `future_forecast.csv` contains exactly five rows with the expected
+  horizon labels, target dates, origin price and percent change from the origin.
+- A combined future-forecast table was written to
+  `artifacts/comparison/future_forecasts.csv`.
+- Future forecast plots were generated for all four models.
+- Ten focused automated tests passed: release timing, stale-data expiry, feature
   prefix invariance, target cutoff purging, observed sequence labels, final holdout
-  separation, missing target preservation, negative WTI handling and date parsing.
+  separation, missing target preservation, negative WTI handling, date parsing and
+  anchored future macro paths.
 - Python modules compiled and all notebook JSON passed nbformat validation.
-- Preprocessing plot visually inspected.
 
 ## Execution details
 
-Notebook code cells were executed in process with IPython and captured outputs.
-This environment does not permit launching a socket-based Jupyter kernel, including
-local IPC; normal nbclient kernel execution could therefore not be validated here.
-The same code cells ran successfully without requiring sockets. The delivered
-notebooks retain standard Python kernel metadata for use in Jupyter.
+The current run used the command-line pipeline stages rather than cell-by-cell
+notebook execution:
 
-The main preprocessing notebook includes executed outputs. The main model and
-comparison notebooks retain full experiment defaults and no misleading short-run
-outputs. Executed shortened notebook copies and JSON summaries are under validation/.
-Saved artifacts inside validation/lifecycle/ are TEST ONLY, trained on an early
-subset, and must not be mistaken for final models.
+```bash
+python run_pipeline.py --stage preprocess
+python run_pipeline.py --stage forecast --model all
+python -m unittest -v test_pipeline.py
+```
+
+Notebook sources were updated to match the new forecast-only behavior, but the
+notebooks themselves were not re-executed cell by cell in this run. The delivered
+notebooks remain ready to run in Jupyter.
+
+Earlier `[1, 5, 20]` cross-validation, holdout and forecast artifacts were moved to
+`artifacts/_archive_1_5_20/` and are not part of the current live outputs.
 
 ## Not performed
 
-- The full five-fold, three-candidate searches at up to 60 neural epochs.
-- Evaluation of the actual final holdout.
-- Final models trained on the complete current history.
+- Cross-validation or holdout scoring with the new five-horizon configuration.
+- Hyperparameter reselection or model ranking.
+- Evaluation of forecast accuracy on future observed prices.
 - Verification of historical release vintages, publication timestamps, source price
   authenticity, gold quotation unit, or a gold-specific holiday calendar.
 - Calibrated prediction intervals or statistical significance testing.
 
-There is consequently no final model ranking or forecasting-performance claim.
-Run the full development notebooks before interpreting comparative accuracy.
+There is consequently no model ranking or forecasting-performance claim for the
+new horizons. The saved values are conditional future forecasts, not validated
+accuracy results.

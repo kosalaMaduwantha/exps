@@ -7,8 +7,9 @@ Design rules
   without every backend installed.
 - Every fold fits fresh preprocessing and a fresh model. Nothing learned on
   outer evaluation data is ever reused for selection or refitting.
-- Fixed-origin forecasts use external values known at the origin; future
-  market/gold realized values are never read.
+- Fixed-origin forecasts use external values known at the origin. The final
+  Prophet forecast may use auxiliary future external paths; future market/gold
+  realized values are never read.
 """
 import json
 import time
@@ -311,13 +312,54 @@ def fit_model(kind, panel, x, cutoff, params, cfg):
     return bundle
 
 
-def predict_model(bundle, panel, x, origins, cfg):
+def forecast_external_paths(panel, x, origin, columns, cfg):
+    """Forecast anchored future external regressor values with Prophet.
+
+    Each regressor uses its own daily as-of history through ``origin``. The
+    fitted coefficients of the main gold model stay frozen while the future
+    macro inputs follow their own forecast paths. Paths are anchored so the
+    first forecast step continues from the last observed regressor value.
+    """
+    from prophet import Prophet
+
+    future_dates = pd.bdate_range(
+        panel.index[origin] + pd.offsets.BDay(1),
+        periods=max(cfg['horizons']),
+    )
+    paths = pd.DataFrame({'ds': future_dates})
+    for column in columns:
+        history = x[column].iloc[:origin + 1].dropna()
+        if history.empty:
+            paths[column] = np.nan
+            continue
+        if len(history) < 30 or history.nunique() <= 1:
+            paths[column] = history.iloc[-1]
+            continue
+        model = Prophet(
+            yearly_seasonality=True,
+            weekly_seasonality=False,
+            daily_seasonality=False,
+            uncertainty_samples=0,
+            changepoint_prior_scale=0.05,
+        )
+        model.fit(pd.DataFrame({'ds': history.index, 'y': history.to_numpy()}))
+        predict_dates = pd.DatetimeIndex([history.index[-1]]).append(future_dates)
+        forecast = model.predict(pd.DataFrame({'ds': predict_dates}))
+        adjustment = history.iloc[-1] - forecast['yhat'].iloc[0]
+        paths[column] = forecast['yhat'].iloc[1:].to_numpy() + adjustment
+    return paths
+
+
+def predict_model(bundle, panel, x, origins, cfg, future_regressors=None):
     """Produce fixed-origin forecasts for every configured horizon."""
     columns = bundle['columns']
     if bundle['training_config']['horizons'] != cfg['horizons']:
         raise ValueError('Prediction horizons differ from the trained model.')
     kind = bundle['kind']
     anchor = panel.y.iloc[origins].to_numpy()
+
+    if future_regressors is not None and len(origins) != 1:
+        raise ValueError('Future regressor paths require exactly one origin.')
 
     if kind == 'xgboost':
         returns = np.column_stack(
@@ -334,8 +376,13 @@ def predict_model(bundle, panel, x, origins, cfg):
         returns = bundle['target_scaler'].inverse_transform(standardized)
         return anchor[:, None] * np.exp(returns)
 
-    # Prophet: hold external factors at their origin values for the whole
-    # forecast; only calendar dates change after the origin.
+    paths = None
+    if future_regressors is not None:
+        paths = future_regressors.copy()
+        if 'ds' in paths.columns:
+            paths = paths.set_index('ds')
+        paths.index = pd.to_datetime(paths.index)
+
     predictions = []
     for origin in origins:
         dates = pd.bdate_range(
@@ -344,7 +391,12 @@ def predict_model(bundle, panel, x, origins, cfg):
         future = pd.DataFrame({'ds': dates})
         for column in columns:
             value = x.iloc[origin][column]
-            future[column] = value if pd.notna(value) else bundle['medians'][column]
+            fallback = value if pd.notna(value) else bundle['medians'][column]
+            if paths is not None and column in paths.columns:
+                series = paths[column].reindex(dates)
+                future[column] = series.where(series.notna(), fallback).to_numpy()
+            else:
+                future[column] = fallback
         forecast = bundle['model'].predict(future)
         predictions.append(
             [np.exp(forecast.yhat.iloc[h-1]) for h in cfg['horizons']]
@@ -561,9 +613,9 @@ def load_bundle(directory):
 def refit_and_forecast(kind, panel, x, cfg):
     """Refit the locked configuration and forecast future horizons once.
 
-    The forecast starts from the latest observed gold quote; future actual
-    external values are intentionally not supplied. Generates no calibrated
-    uncertainty interval.
+    The forecast starts from the latest observed gold quote. Prophet uses
+    auxiliary daily as-of paths for its external regressors; other models keep
+    origin-time features. Generates no calibrated uncertainty interval.
     """
     output = ROOT / 'artifacts' / kind
     params_path = output / 'locked_parameters.json'
@@ -574,17 +626,32 @@ def refit_and_forecast(kind, panel, x, cfg):
     params = json.loads(params_path.read_text())
     cutoff = int(np.flatnonzero(panel.y.notna().to_numpy())[-1])
     bundle = fit_model(kind, panel, x, cutoff, params, cfg)
-    values = predict_model(bundle, panel, x, np.array([cutoff]), cfg)[0]
+
+    future_regressors = None
+    if kind == 'prophet':
+        future_regressors = forecast_external_paths(
+            panel, x, cutoff, bundle['columns'], cfg
+        )
+        future_regressors.to_csv(output / 'future_regressors.csv', index=False)
+
+    values = predict_model(
+        bundle, panel, x, np.array([cutoff]), cfg,
+        future_regressors=future_regressors,
+    )[0]
     save_bundle(bundle, output / 'final_model')
 
+    origin_price = float(panel.y.iloc[cutoff])
     forecast = pd.DataFrame(
         {
             'origin': panel.index[cutoff],
             'horizon': cfg['horizons'],
+            'horizon_label': cfg['horizon_labels'],
             'target_date': [
                 panel.index[cutoff] + pd.offsets.BDay(h) for h in cfg['horizons']
             ],
+            'origin_price': origin_price,
             'forecast': values,
+            'change_from_origin_pct': (values / origin_price - 1) * 100,
             'model': kind,
         }
     )

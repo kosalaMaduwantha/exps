@@ -27,7 +27,10 @@ ROOT = Path(__file__).resolve().parent
 
 def load_config():
     """Read the shared experiment configuration from config.json."""
-    return json.loads((ROOT / 'config.json').read_text())
+    cfg = json.loads((ROOT / 'config.json').read_text())
+    if len(cfg.get('horizon_labels', [])) != len(cfg['horizons']):
+        raise ValueError('horizon_labels and horizons must have the same length.')
+    return cfg
 
 
 def numeric(values):

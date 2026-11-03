@@ -260,11 +260,10 @@ These figures use the fixed-origin predictions from each outer fold:
 Each plot is also saved to `artifacts/<model>/plots/`.'''),
         code('''from gold_plot_utils import plot_model_cv
 plot_model_cv(panel, cv_predictions, folds, KIND, cfg, ROOT / 'artifacts' / KIND)'''),
-        markdown('''## 7. Lock the final configuration and evaluate the untouched holdout
-The default is off so you can review development results first. Set
-`final_holdout_enabled` to true in `config.json` when ready. This is an experiment guard,
-not a request for additional permission. The function chooses parameters using development
-history, records them before scoring, and preserves existing holdout results.'''),
+        markdown('''## 7. Holdout is intentionally skipped
+This run produces future forecasts only. `final_holdout_enabled` stays false, so
+no holdout scoring or model ranking is performed. The next cell simply reports
+that the holdout was not evaluated.'''),
         code('''cfg = load_config()
 if cfg['final_holdout_enabled']:
     holdout_predictions, holdout_metrics, locked_parameters = evaluate_holdout(
@@ -272,14 +271,15 @@ if cfg['final_holdout_enabled']:
     display(holdout_metrics)
     display(locked_parameters)
 else:
-    print('Holdout not evaluated. Development predictions remain available for review.')'''),
+     print('Holdout not evaluated; this is a forecast-only run.')'''),
+
         markdown('''## 8. Refit the locked model and generate future forecasts
-Run after the final holdout stage. The forecast starts from the latest observed gold quote.
-Only the configured horizons are returned. Future actual external factors are not supplied.
+Run when locked parameters exist. The forecast starts from the latest observed gold quote.
+Only the configured horizons are returned. Prophet uses auxiliary future external paths; other models keep origin-time features.
 Artifacts include the fitted model, input feature names, preprocessing where applicable,
 locked configuration, predictions and metrics. No calibrated uncertainty intervals are claimed.'''),
         code('''locked = ROOT / 'artifacts' / KIND / 'locked_parameters.json'
-if cfg['final_holdout_enabled'] and locked.exists():
+if locked.exists():
     future_forecast = refit_and_forecast(KIND, panel, features, cfg)
     display(future_forecast)
 else:
