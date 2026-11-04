@@ -1,0 +1,2 @@
+# Optional legacy notebook presentation dependencies; modeling pins stay in requirements.txt.
+seaborn>=0.13,<0.14

@@ -1,5 +1,47 @@
 # Validation performed
 
+## Application implementation verification — 2026-11-04
+
+The library/API/dashboard implementation was verified separately from model
+accuracy experiments:
+
+- **24 automated checks passed**, including the original ten time-safety checks,
+  fixture-based artifact/API/client/Plotly tests, pure extracted-recipe tests,
+  Streamlit AppTest interaction across all three views, and frozen reload parity
+  for all four saved model families.
+- `mypy` passed for **50 source modules** across `model_lib`, shared contracts,
+  FastAPI, the typed client, and Streamlit views/chart builders.
+- Ruff's Python correctness checks passed; application/library modules compiled.
+- All six daily notebooks, the three sibling experimental notebooks, and the new
+  publication notebook passed nbformat and executable-cell syntax validation.
+- Notebook 07 executed successfully, copying existing model bundles and forecast
+  snapshots into the git-ignored serving store and explicitly promoting them.
+  It did not train, select, evaluate, or refit a model.
+- The real published store returned HTTP 200 for health, readiness, model listing,
+  and history. Spot inference returned HTTP 200 for Prophet, XGBoost, GRU, and LSTM
+  with exact metadata-driven inputs. Each family exposed its saved snapshot.
+- Actual Uvicorn and Streamlit processes passed HTTP startup checks for API
+  health/readiness/Swagger and dashboard health/index; both were then shut down.
+- Importing the API does not import `model_lib.model_training`; serving prediction
+  uses frozen inference and native deserialization modules directly.
+
+Verification used Python 3.12, the existing modeling environment, and the versions
+in the new application dependency files. Tests were run in an isolated temporary
+application environment. The actual saved-model integration command was:
+
+```bash
+GOLD_VERIFY_SAVED_MODELS=1 python -m pytest -q
+python -m mypy
+```
+
+No full development CV, hyperparameter reselection, new five-horizon holdout
+evaluation, or final model refit was performed for application validation.
+The existing auxiliary-path unit test fits small synthetic regressors; API/UI
+fixture checks and saved-bundle parity do not train. Original notebook output
+cells remain historical; the nine research notebooks were not rerun end-to-end.
+The dashboard therefore shows no published five-horizon test evaluation until
+one is actually produced and published from a notebook.
+
 ## Passed checks
 
 - Shared preprocessing executed on all supplied source files.

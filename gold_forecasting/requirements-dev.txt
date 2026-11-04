@@ -1,0 +1,6 @@
+-r requirements-api.txt
+-r requirements-dashboard.txt
+mypy==1.15.0
+pytest>=8,<10
+types-cachetools>=5
+ruff==0.11.11

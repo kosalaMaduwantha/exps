@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gold-forecasting"
+version = "0.1.0"
+requires-python = ">=3.11"
+description = "Notebook-driven gold model library, forecast API and Streamlit dashboard"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["model_lib*", "gold_contracts*", "gold_api*", "gold_dashboard*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "test_pipeline.py"]
+
+[tool.mypy]
+python_version = "3.11"
+files = ["gold_contracts", "gold_api", "gold_dashboard", "model_lib"]
+check_untyped_defs = true
+disallow_untyped_defs = true
+ignore_missing_imports = true
+follow_imports = "silent"
+plugins = ["pydantic.mypy"]

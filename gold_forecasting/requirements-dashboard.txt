@@ -1,0 +1,6 @@
+# The dashboard can run independently of native modeling libraries.
+streamlit==1.45.1
+plotly==6.1.2
+httpx==0.28.1
+pydantic==2.11.4
+cachetools>=5,<6

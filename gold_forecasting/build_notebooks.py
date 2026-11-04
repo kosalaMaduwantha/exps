@@ -51,7 +51,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from IPython.display import display
-from gold_common_utils import ROOT, load_config
+from model_lib.preprocessing import ROOT, load_config
 cfg = load_config()
 pd.set_option('display.max_columns', 20)
 print('Project:', ROOT)
@@ -83,7 +83,7 @@ source_inventory = pd.DataFrame([
 display(source_inventory)
 display(pd.read_excel(raw_dir / 'gold_data_new.xlsx', header=None).head(8))'''),
 markdown('''## 2. Clean, align, and create candidates
-`preprocess` calls small documented functions in `gold_common_utils.py`.
+`preprocess` calls documented functions in `model_lib.preprocessing`.
 Dates are reconciled only when one date column supplies an unambiguous in-range date.
 Conflicting duplicate target prices and ambiguous dates are quarantined for review.
 Exact target duplicates retain the first source row. Bounds reject obvious invalid values;
@@ -91,7 +91,7 @@ trailing robust flags are diagnostic and do not automatically remove genuine sho
 
 External values enter through a backward availability-date join. DXY is monthly, WTI uses
 absolute changes, and the redundant Fed file is checked but not duplicated as a feature.'''),
-code('''from gold_common_utils import preprocess, make_folds, validate_panel
+code('''from model_lib.preprocessing import preprocess, make_folds, validate_panel
 panel, features, cleaning_audit, availability = preprocess(cfg)
 validate_panel(panel, features)
 print('Calendar slots:', len(panel))
@@ -119,7 +119,7 @@ display(features.isna().mean().sort_values(ascending=False).head(15).rename('mis
 markdown('''## 5. Check causality by truncating history
 Appending future rows must not change any already constructed feature.
 Training-fitted scaling, imputation and model selection happen in the model notebooks.'''),
-code('''from gold_common_utils import make_features
+code('''from model_lib.preprocessing import make_features
 cut = len(panel) - cfg['holdout_steps']
 prefix_features = make_features(panel.iloc[:cut], cfg)
 pd.testing.assert_frame_equal(prefix_features, features.iloc[:cut])
@@ -169,8 +169,8 @@ The small initial architecture is deliberate because this dataset contains only 
         ),
         code(setup),
         markdown('## 1. Load the shared panel and evaluation contract'),
-        code(f'''from gold_common_utils import load_prepared, feature_columns, forecast_origins, metrics
-from gold_model_utils import (DEFAULT_TRIALS, run_cross_validation, evaluate_holdout,
+        code(f'''from model_lib.preprocessing import load_prepared, feature_columns, forecast_origins, metrics
+from model_lib.model_training import (DEFAULT_TRIALS, run_cross_validation, evaluate_holdout,
                               refit_and_forecast, fit_model, predict_model)
 KIND = '{kind}'
 panel, features, folds = load_prepared()
@@ -179,7 +179,7 @@ print('Observed target:', panel.y.notna().sum())'''),
         markdown('''## 2. Inspect input feature groups and candidate settings
 `gold_only` establishes whether external factors improve an already useful gold-history model.
 The initial search is intentionally small; expand it using development results only.
-All candidate selection uses earlier inner validation. Read the adapters in `gold_model_utils.py`
+All candidate selection uses earlier inner validation. Read the adapters in `model_lib.model_training`
 for the explicit training and prediction logic.'''),
         code('''trials = [dict(trial) for trial in DEFAULT_TRIALS[KIND]]
 display(pd.DataFrame(trials))
@@ -192,7 +192,7 @@ for group in ['gold_only', 'external']:
     if kind == 'xgboost':
         cells += [
             markdown('## 3. Check supervised labels and their dates'),
-            code('''from gold_model_utils import supervised_rows
+            code('''from model_lib.model_training import supervised_rows
 cutoff = int(folds.iloc[0].cutoff)
 rows, log_changes = supervised_rows(panel, cutoff, cfg['horizons'][-1])
 display(pd.DataFrame({'origin': panel.index[rows[-5:]],
@@ -203,7 +203,7 @@ assert (rows + cfg['horizons'][-1] <= cutoff).all()'''),
     elif kind in ('gru', 'lstm'):
         cells += [
             markdown('## 3. Inspect sequence shapes and architecture'),
-            code('''from gold_model_utils import sequence_rows, build_network
+            code('''from model_lib.model_training import sequence_rows, build_network
 example = trials[0]
 cutoff = int(folds.iloc[0].cutoff)
 rows = sequence_rows(panel, cutoff, example['lookback'], cfg['horizons'])
@@ -231,7 +231,7 @@ available at each origin. Outer labels are used only for scoring.
 
 For a quick installation check, use one fold and one candidate. Restore the full settings before
 comparing models or making performance claims.'''),
-        code('''# Full defaults: five outer folds and all candidates above.
+        code('''# Full defaults: configured development folds and all candidates above.
 cv_folds = folds
 cv_predictions, cv_metrics, selections = run_cross_validation(
     KIND, panel, features, cv_folds, cfg, trials=trials)
@@ -258,7 +258,7 @@ These figures use the fixed-origin predictions from each outer fold:
 3. training context plus test block per fold;
 4. actual vs predicted price per horizon.
 Each plot is also saved to `artifacts/<model>/plots/`.'''),
-        code('''from gold_plot_utils import plot_model_cv
+        code('''from model_lib.reporting.plots import plot_model_cv
 plot_model_cv(panel, cv_predictions, folds, KIND, cfg, ROOT / 'artifacts' / KIND)'''),
         markdown('''## 7. Holdout is intentionally skipped
 This run produces future forecasts only. `final_holdout_enabled` stays false, so
@@ -288,7 +288,7 @@ else:
 These figures appear only when the matching artifacts exist:
 - `artifacts/<model>/holdout_predictions.csv` after a locked holdout run;
 - `artifacts/<model>/future_forecast.csv` after the final refit.'''),
-        code('''from gold_plot_utils import plot_model_holdout, plot_future_forecast
+        code('''from model_lib.reporting.plots import plot_model_holdout, plot_future_forecast
 out_dir = ROOT / 'artifacts' / KIND
 holdout_path = out_dir / 'holdout_predictions.csv'
 future_path = out_dir / 'future_forecast.csv'
@@ -315,7 +315,12 @@ Models are compared on the intersection of observed targets and common forecast 
 The persistence baseline predicts the gold price observed at the origin.'''),
 code(setup),
 markdown('## 1. Load development results and check coverage'),
-code('''from gold_model_utils import compare_results
+code('''from model_lib.model_training import compare_results
+from model_lib.preprocessing import load_prepared
+from model_lib.reporting.plots import (
+    plot_comparison_actual_and_forecasts, plot_comparison_by_fold,
+    plot_comparison_scatter, plot_comparison_error_ranking)
+panel, features, folds = load_prepared()
 predictions, results, coverage = compare_results('cv')
 display(coverage)
 print('Models currently available:', predictions.model.unique().tolist())

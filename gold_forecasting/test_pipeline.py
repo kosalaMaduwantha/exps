@@ -11,7 +11,7 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from gold_common_utils import (
+from model_lib.preprocessing import (
     available_series,
     forecast_origins,
     load_config,
@@ -19,7 +19,7 @@ from gold_common_utils import (
     make_features,
     parse_gold_date,
 )
-from gold_model_utils import forecast_external_paths, sequence_rows, supervised_rows
+from model_lib.model_training import forecast_external_paths, sequence_rows, supervised_rows
 
 
 class TimeSafetyTests(unittest.TestCase):

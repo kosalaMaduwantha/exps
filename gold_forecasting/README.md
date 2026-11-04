@@ -1,4 +1,4 @@
-# Gold forecasting notebooks
+# Gold forecasting library, API, and dashboard
 
 Six readable notebooks implement shared preprocessing, Prophet, XGBoost, GRU,
 LSTM, and a common comparison workflow. The original supplied data is included.
@@ -29,18 +29,155 @@ Run these notebooks in order:
    `04_gold_gru.ipynb`, `05_gold_lstm.ipynb`
 3. `06_gold_model_comparison.ipynb`
 
-Keep both Python utility files and config.json beside the notebooks.
-Each notebook explains its inputs, transformations, training and evaluation.
-The utility functions contain the longer reusable logic and comments.
+The notebooks import the shared `model_lib` package directly. Keep config.json,
+data/, and artifacts/ in the project root. Notebook 07 publishes reviewed model
+bundles and forecast snapshots for serving without retraining them.
 
-The alternative command-line workflow is:
+The non-training command-line helpers are:
 
 ```bash
 python run_pipeline.py --stage preprocess
-python run_pipeline.py --stage cv --model all
 python run_pipeline.py --stage compare
 python -m unittest -v test_pipeline.py
 ```
+
+Training, cross-validation, model/parameter selection, holdout evaluation, and
+final refit run only from notebooks. The CLI no longer exposes `cv`, `holdout`,
+or the old `forecast` stage, which performed a refit. Shared algorithms remain
+available as typed library functions for notebook use.
+
+## API and Streamlit dashboard setup
+
+From this project directory, in your modeling environment:
+
+```bash
+python -m pip install -r requirements.txt -r requirements-api.txt
+python -m pip install -e . --no-deps
+```
+
+Run `07_publish_dashboard_artifacts.ipynb` after reviewing the existing saved
+models/forecasts. Set a new immutable `VERSION` when publishing changed results.
+Its separate promotion cell activates the versions. No models are trained by
+this notebook. Existing five-horizon artifacts can be published immediately;
+there are no matching holdout results to publish for the current run.
+
+Start the API from this directory:
+
+```bash
+python -m uvicorn gold_api.main:app --host 127.0.0.1 --port 8000
+```
+
+- Swagger/OpenAPI: <http://127.0.0.1:8000/docs>.
+- `GET /health` checks liveness; `GET /ready` validates prepared data and loads
+  promoted bundles. Neither fits models.
+- `GOLD_ARTIFACT_ROOT` selects the serving store; default is
+  `artifacts/serving/` under this project. The notebook and API must use the same
+  root. Missing/unpublished stores return an actionable 503.
+- Store layout: `registry.json`, `models/{model_id}/{version}/`,
+  `evaluations/{model_id}/{report_id}.json`, and
+  `forecasts/{model_id}/{snapshot_id}.json`. Runtime publications are git-ignored.
+- Promote or roll back explicitly from a notebook using
+  `store.promote(model_id, version)`. Published versions cannot be overwritten.
+
+The dashboard can run in the same environment or a separate lightweight one:
+
+```bash
+python -m pip install -r requirements-dashboard.txt
+python -m pip install -e . --no-deps
+streamlit run gold_dashboard/app.py
+```
+
+Set `GOLD_API_URL` to the API base URL when it is not `http://127.0.0.1:8000`.
+The dashboard reads only HTTP responses; it does not need access to data or
+native model files. Plotly supplies all dashboard charts.
+
+### Dashboard views
+
+1. **Test evaluation:** saved actual-versus-predicted and residual charts,
+   persistence baseline, saved horizon metrics, sample counts, and provenance.
+   With the current forecast-only artifacts it correctly shows no published
+   evaluation; it never substitutes archived incompatible horizons.
+2. **Future forecasts:** observed history and notebook-published forecast
+   snapshots at configured horizon dates. Dates/version/cutoff and regressor-path
+   assumptions remain visible. Markers do not imply interpolated daily forecasts.
+3. **Spot prediction:** select model, observed origin and horizon, then enter the
+   exact external regressor values requested by model metadata. Models using only
+   gold/calendar inputs require no external values. Submit explicitly to infer.
+
+Read-only API responses are cached for up to 60 seconds with bounded cache size,
+keyed by model version and request filters. **Refresh API data** clears caches.
+Inference POSTs are not cached. A stale metadata version produces HTTP 409 and
+requires refreshing the form. The displayed result always identifies the last
+submitted scenario; form edits are not applied until submission.
+
+### Spot prediction semantics and example
+
+`origin_date` is a historical observed gold quote. Each horizon counts weekday
+grid steps; this is not a holiday-aware market calendar. Regressor names/values
+are validated against `GET /models/{model_id}` and remain request-local:
+
+- XGBoost: override the selected origin's external feature row.
+- GRU/LSTM: override the final timestep; earlier sequence context is unchanged.
+- Prophet live inference: hold supplied external values constant over the
+  forecast period. It never fits auxiliary regressors inside a request.
+- Published Prophet snapshots may use notebook-fitted auxiliary paths instead,
+  and carry that distinction in their provenance.
+
+A model trained after an origin returns `retrospective: true`: this is a scenario,
+not an out-of-sample backtest. The API returns no accuracy claim for spot inputs.
+Gold lags, recurrent context, and calendar features are server-derived.
+
+For the currently saved gold-only XGBoost model after notebook 07's initial
+publication (refresh metadata if a different version is promoted):
+
+```bash
+curl -X POST http://127.0.0.1:8000/forecasts/spot \
+  -H 'Content-Type: application/json' \
+  -d '{"model_id":"xgboost","expected_version":"initial-2026-10-26","origin_date":"2026-10-26","horizon":21,"regressors":{}}'
+```
+
+### Data APIs and error contracts
+
+`GET /models`, `/models/{model_id}`, `/models/{model_id}/origins`, and `/history`
+serve metadata and context. `/models/{model_id}/evaluations` and
+`/models/{model_id}/evaluations/{report_id}` serve frozen test reports.
+`/models/{model_id}/forecast-snapshots` and the `/{snapshot_id}` detail route serve
+saved future forecasts. `POST /forecasts` returns all configured horizons and
+`POST /forecasts/spot` returns one.
+
+History/origins/evaluation rows support bounded `offset`/`limit` pagination
+(default 500, maximum 2000), inclusive `start_date`/`end_date` filters, and horizon
+filters where applicable. Evaluation metrics describe the full published report
+per horizon, independent of pagination/date filters; `metric_scope` says so.
+
+Schema v1 uses ISO dates, finite JSON numbers, and explicit `null` optional
+interval/metric fields. Error bodies have `schema_version`, `code`, and `message`:
+422 invalid input; 404 unknown model/report/snapshot; 409 stale active model;
+503 missing, stale, corrupt, or incompatible required data/backend. Empty report
+collections return 200 with an empty list. Routes return typed data, not figures.
+
+## Maintainability, recipes, and verification
+
+See [module and contract guide](docs/application_architecture.md) and
+[cell-level notebook mapping](docs/notebook_library_mapping.md).
+The three sibling notebooks use named diagnostic recipes in `model_lib.recipes`.
+Their helpers now have explicit context arguments instead of notebook globals.
+Install this library editable in their kernel and install
+`requirements-notebooks.txt` for optional legacy plots. Their historical outputs
+are preserved, not relabeled as new validation. Existing daily-model notebook
+edits are preserved; `build_notebooks.py` was updated but not run over those edits.
+
+```bash
+python -m pip install -r requirements-dev.txt
+python -m pytest -q
+python -m mypy
+# Optional integration check: reload actual saved bundles, never refit:
+GOLD_VERIFY_SAVED_MODELS=1 python -m pytest tests/test_saved_models.py -q
+```
+
+Tests use small published fixtures and mocked native predictions for API/UI
+checks. The saved-model check requires the original native artifacts/modeling
+dependencies. Full CV/refit remains a separately requested notebook task.
 
 ## Configuration and target choice
 
@@ -148,12 +285,9 @@ prediction intervals or significance claims are provided.
 
 ## Final refit and prediction
 
-The current run uses the already locked hyperparameters and skips the holdout
-stage. Run the final refit cell in each model notebook, or:
-
-```bash
-python run_pipeline.py --stage forecast --model all
-```
+The current saved run used already locked hyperparameters and skipped the holdout
+stage. Future final refits run from the explicit final-refit cells in the model
+notebooks; the CLI and API do not perform refits.
 
 Final refitting uses the locked configuration and all available observed history.
 Saved forecasts contain the origin date, horizon, horizon label, target date,
